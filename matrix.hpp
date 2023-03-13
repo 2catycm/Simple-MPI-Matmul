@@ -30,8 +30,10 @@ struct Matrix {
     const Tp &operator()(size_t row, size_t col) const {
         return mData[row * mColCount + col];
     }
+    Matrix(){}
     //从外部数据构造，并且抢夺该数据的所有权。外面的数据不需要再delete。
     Matrix(Tp *eData, size_t rows, size_t cols) : mData(eData), mRowCount(rows), mColCount(cols) {}
+    Matrix(std::unique_ptr<Tp[]> &&eData, size_t rows, size_t cols) : mData(std::move(eData)), mRowCount(rows), mColCount(cols) {}
     //空白构造
     Matrix(size_t rows, size_t cols) : mRowCount(rows), mColCount(cols) {
         mData = std::make_unique<Tp[]>(rows * cols);
