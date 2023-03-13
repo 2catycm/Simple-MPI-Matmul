@@ -1,6 +1,9 @@
 CC=mpicc -std=c11
-CXX=mpic++ -std=c++17
+# CXX=mpic++ -std=c++17
+CXX=mpicxx -std=c++17
 all: leader.exe peer.exe
+clean: 
+	rm -rf out/*
 peer: mpi_matmul_peer_pattern.exe
 	mpirun -np 4 out/mpi_matmul_peer_pattern.exe
 

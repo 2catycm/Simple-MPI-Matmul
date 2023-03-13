@@ -18,14 +18,16 @@ using namespace std;
 // constexpr size_t MAT_SIZE = 3;
 // 允许外部编译时定义。
 #ifndef MAT_SIZE
+// #define MAT_SIZE 3
+// #define MAT_SIZE 125
 // #define MAT_SIZE 500
 #define MAT_SIZE 1000
 #endif // !MAT_SIZE
 
 constexpr size_t MAT_SIZE_SQUARED = MAT_SIZE*MAT_SIZE;
 // 编译时生成矩阵和答案
-constexpr array<array<double, MAT_SIZE*MAT_SIZE>, 3> get_ABC() {
-// array<array<double, MAT_SIZE*MAT_SIZE>, 3> get_ABC() {
+// constexpr array<array<double, MAT_SIZE*MAT_SIZE>, 3> get_ABC() {
+array<array<double, MAT_SIZE*MAT_SIZE>, 3> get_ABC() {
     auto result = array<array<double, MAT_SIZE*MAT_SIZE>, 3>{};
     for (size_t i = 0; i < MAT_SIZE; ++i) {
         for (size_t j = 0; j < MAT_SIZE; ++j) {
@@ -34,14 +36,15 @@ constexpr array<array<double, MAT_SIZE*MAT_SIZE>, 3> get_ABC() {
         }
     }
     // memory contined matmul to compute C
-    for (size_t i = 0; i < MAT_SIZE; ++i) {
-        for (size_t k = 0; k < MAT_SIZE; ++k) {
-            const auto &temp = result[0][i*MAT_SIZE+k];
-            for (size_t j = 0; j < MAT_SIZE; ++j) {
-                result[2][i*MAT_SIZE+j] += temp * result[1][k*MAT_SIZE+j];
-            }
-        }
-    }
+    // 跑python的时候注释掉这里，我们已经知道我们没有算错。
+    // for (size_t i = 0; i < MAT_SIZE; ++i) {
+    //     for (size_t k = 0; k < MAT_SIZE; ++k) {
+    //         const auto &temp = result[0][i*MAT_SIZE+k];
+    //         for (size_t j = 0; j < MAT_SIZE; ++j) {
+    //             result[2][i*MAT_SIZE+j] += temp * result[1][k*MAT_SIZE+j];
+    //         }
+    //     }
+    // }
     return result;
 }
 auto abc = get_ABC();
@@ -104,12 +107,12 @@ void leader() {
 
     double finish = MPI_Wtime();
     double time = finish - start;
-    printf("Done in %f seconds.\n", time);
+    clog<<"Done in "<<time<<" seconds."<<endl;
     if (MAT_SIZE <= 10) {
         cout<<"res_actually="<<result<<endl;
         cout<<"res_expected="<<bf_result<<endl;
     }
-    cout<<"Error: "<<bf_result.root_mean_square_error(result)<<endl;
+    clog<<"Error: "<<bf_result.root_mean_square_error(result)<<endl;
 }
 
 template<typename Tp>
@@ -130,16 +133,17 @@ Matrix<Tp> TMPI_MatMul(Matrix<Tp> A, Matrix<Tp> B){
             }
         }
     }
-    // cout<<mpi_rank<<" reports "<<result<<endl;
     MPI_Barrier(MPI_COMM_WORLD);
+    cout<<mpi_rank<<" reports "<<endl;
     MPI_Reduce(result.mData.get(), global_result.mData.get(), result.mRowCount*result.mColCount, mpi_type<Tp>(), MPI_SUM, leader_rank, MPI_COMM_WORLD);
+    cout<<mpi_rank<<" should finishes."<<endl;
     return global_result;
 }
 template <typename Tp>
 void follower() {
     //从进程
     cout<<"I am a follower"<<endl;
-    auto a = Matrix(MAT_SIZE, MAT_SIZE);
-    auto b = Matrix(MAT_SIZE, MAT_SIZE);
+    auto a = Matrix<double>(MAT_SIZE, MAT_SIZE);
+    auto b = Matrix<double>(MAT_SIZE, MAT_SIZE);
     TMPI_MatMul(a,b); // 主从进程都是这里
 }

@@ -32,7 +32,7 @@ for i, mat_size in tqdm(enumerate(mat_sizes)):
         if os.system(compile_command)!=0:
             raise ValueError(f"Compile failed, command was {compile_command}")
     for j, process in enumerate(processes):
-        command = f"mpiexec -np {process} {executable.as_posix()} {mat_size}"
+        command = f"mpirun -f $LSB_DJOB_HOSTFILE -n {2*process} -ppn {process} {executable.as_posix()} {mat_size}"
         pro = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         max_time = 1
         start_time = time.time()
