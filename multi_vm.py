@@ -13,8 +13,10 @@ if not out_directory.exists():
 method_name = "mpi_matmul_peer_pattern"
 
 source = this_directory / f"{method_name}.cpp"
-processes = [2**i for i in range(6)]
-mat_sizes = [125*2**i for i in range(6)]
+# processes = [2**i for i in range(8)] # 一直到2^7 = 128
+# mat_sizes = [125*2**i for i in range(6)]
+processes = [64, 128]
+mat_sizes = [4000]
 
 # mpicxx = "mpic++" 
 # mpicxx = "mpiicpc" 
@@ -33,10 +35,12 @@ for i, mat_size in tqdm(enumerate(mat_sizes)):
             raise ValueError(f"Compile failed, command was {compile_command}")
     for j, process in enumerate(processes):
         command = f"mpirun -f $LSB_DJOB_HOSTFILE -n {2*process} -ppn {process} {executable.as_posix()} {mat_size}"
-        pro = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        max_time = 1
+        # max_time = 1
+        max_time = 100
         start_time = time.time()
         while time.time()-start_time<max_time:
+            pro = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            
             outputs = pro.stderr.decode("UTF-8")
             # 取出运行时间
             try:
@@ -54,13 +58,14 @@ for i, mat_size in tqdm(enumerate(mat_sizes)):
                 print(f"在矩阵大小{mat_size}和进程数{process}下运行失败，输出为{outputs}")
                 print(e)
                 break
+        print(f"在矩阵大小{mat_size}和进程数{process}下运行成功，跑了{experiment_times[i,j]}次，实验用时{time.time()-start_time}, 矩阵计算用时{times[i,j]}")
         
 # df = pd.DataFrame(data, index=mat_sizes, columns=processes)
 df = pd.DataFrame(times, index=mat_sizes, columns=processes)
-df.to_excel('result_times.xlsx')
+df.to_excel('results/multi_vm/result_times.xlsx')
 df = pd.DataFrame(errors, index=mat_sizes, columns=processes)
-df.to_excel('result_errors.xlsx')
+df.to_excel('results/multi_vm/result_errors.xlsx')
 df = pd.DataFrame(experiment_times, index=mat_sizes, columns=processes)
-df.to_excel('result_experiment_times.xlsx')
+df.to_excel('results/multi_vm/result_experiment_times.xlsx')
 
         

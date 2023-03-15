@@ -33,17 +33,22 @@ for i, mat_size in tqdm(enumerate(mat_sizes)):
             raise ValueError(f"Compile failed, command was {compile_command}")
     for j, process in enumerate(processes):
         command = f"mpiexec -np {process} {executable.as_posix()} {mat_size}"
-        pro = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        max_time = 1
+        # max_time = 1
+        max_time = 100 # 预计一小时跑完
         start_time = time.time()
         while time.time()-start_time<max_time:
+            pro = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             outputs = pro.stderr.decode("UTF-8")
+            # with open("running_log.txt", "a") as f:
+            #     f.write(outputs)
+            #     f.write(pro.stdout.decode("UTF-8"))
             # 取出运行时间
             try:
                 lines = outputs.splitlines()
                 line = list(filter(lambda x:x.startswith("Done in") and x.endswith('seconds.'), lines))
                 items = line[0].split()
                 times[i, j] += float(items[2])
+                # print(f"item[2] = {items[2]}")
                 # 取出误差
                 line = list(filter(lambda x:x.startswith("Error:"), lines))
                 items = line[0].split()
@@ -54,6 +59,7 @@ for i, mat_size in tqdm(enumerate(mat_sizes)):
                 print(f"在矩阵大小{mat_size}和进程数{process}下运行失败，输出为{outputs}")
                 print(e)
                 break
+        # print(f"本次运行了{time.time()-start_time}s, 实现了{experiment_times[i,j]}次实验, 矩阵计算用时{times[i, j]}。")
         
 # df = pd.DataFrame(data, index=mat_sizes, columns=processes)
 df = pd.DataFrame(times, index=mat_sizes, columns=processes)

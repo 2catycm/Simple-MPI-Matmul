@@ -1,0 +1,13 @@
+0it [00:00, ?it/s]1it [14:10, 850.49s/it]2it [27:58, 837.25s/it]3it [41:59, 838.94s/it]4it [56:05, 841.79s/it]5it [1:10:31, 850.47s/it]5it [1:24:20, 1012.10s/it]
+Traceback (most recent call last):
+  File "/work/ssc-07/yecanming/repo/P_CS_Labs/Distrubuted/Simple-MPI-Matmul/multi_vm.py", line 40, in <module>
+    pro = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  File "/work/ssc-07/team/package_managers/anaconda3/envs/torch2.0/lib/python3.9/subprocess.py", line 507, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+  File "/work/ssc-07/team/package_managers/anaconda3/envs/torch2.0/lib/python3.9/subprocess.py", line 1134, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/work/ssc-07/team/package_managers/anaconda3/envs/torch2.0/lib/python3.9/subprocess.py", line 1979, in _communicate
+    ready = selector.select(timeout)
+  File "/work/ssc-07/team/package_managers/anaconda3/envs/torch2.0/lib/python3.9/selectors.py", line 416, in select
+    fd_event_list = self._selector.poll(timeout)
+KeyboardInterrupt

@@ -26,8 +26,8 @@ using namespace std;
 
 constexpr size_t MAT_SIZE_SQUARED = MAT_SIZE*MAT_SIZE;
 // 编译时生成矩阵和答案
-// constexpr array<array<double, MAT_SIZE*MAT_SIZE>, 3> get_ABC() {
-array<array<double, MAT_SIZE*MAT_SIZE>, 3> get_ABC() {
+constexpr array<array<double, MAT_SIZE*MAT_SIZE>, 3> get_ABC() {
+// array<array<double, MAT_SIZE*MAT_SIZE>, 3> get_ABC() {
     auto result = array<array<double, MAT_SIZE*MAT_SIZE>, 3>{};
     for (size_t i = 0; i < MAT_SIZE; ++i) {
         for (size_t j = 0; j < MAT_SIZE; ++j) {
@@ -37,14 +37,14 @@ array<array<double, MAT_SIZE*MAT_SIZE>, 3> get_ABC() {
     }
     // memory contined matmul to compute C
     // 跑python的时候注释掉这里，我们已经知道我们没有算错。
-    // for (size_t i = 0; i < MAT_SIZE; ++i) {
-    //     for (size_t k = 0; k < MAT_SIZE; ++k) {
-    //         const auto &temp = result[0][i*MAT_SIZE+k];
-    //         for (size_t j = 0; j < MAT_SIZE; ++j) {
-    //             result[2][i*MAT_SIZE+j] += temp * result[1][k*MAT_SIZE+j];
-    //         }
-    //     }
-    // }
+    for (size_t i = 0; i < MAT_SIZE; ++i) {
+        for (size_t k = 0; k < MAT_SIZE; ++k) {
+            const auto &temp = result[0][i*MAT_SIZE+k];
+            for (size_t j = 0; j < MAT_SIZE; ++j) {
+                result[2][i*MAT_SIZE+j] += temp * result[1][k*MAT_SIZE+j];
+            }
+        }
+    }
     return result;
 }
 auto abc = get_ABC();
